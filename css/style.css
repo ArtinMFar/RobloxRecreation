@@ -1,0 +1,358 @@
+:root {
+  --hud-bg: rgba(12, 16, 24, 0.55);
+  --hud-border: rgba(255, 255, 255, 0.22);
+  --hud-text: #fff;
+  --panel-bg: rgba(14, 19, 28, 0.82);
+  --accent: #58a6ff;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #bcd9f2;
+  font-family: var(--font);
+  color: var(--hud-text);
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+}
+#game.rotating {
+  cursor: none;
+}
+#view {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+#safe-area-probe {
+  position: absolute;
+  visibility: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ---------- buttons & panels ---------- */
+
+.top-left,
+.top-right {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.top-left {
+  left: calc(10px + env(safe-area-inset-left));
+  align-items: flex-start;
+}
+.top-right {
+  right: calc(10px + env(safe-area-inset-right));
+  align-items: flex-end;
+}
+
+.icon-btn,
+.mode-btn {
+  pointer-events: auto;
+  touch-action: manipulation;
+  font: 600 15px/1 var(--font);
+  color: var(--hud-text);
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.icon-btn[aria-expanded="true"],
+.icon-btn:hover {
+  background: rgba(40, 52, 70, 0.75);
+}
+.icon-btn:focus-visible,
+.mode-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mode-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px 8px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.mode-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mode-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+/* A second finger brushing the switch while moving should not change modes. */
+#hud.stick-active .mode-btn {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.panel {
+  pointer-events: auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: min(300px, calc(100vw - 40px));
+  box-sizing: border-box;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+}
+.panel[hidden] {
+  display: none;
+}
+.panel-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+.keys[hidden] {
+  display: none;
+}
+.keys dt {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.keys dd {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 10px 0;
+}
+.row input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.row select {
+  font: inherit;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--hud-border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.row select option {
+  background: #1b2330;
+}
+.row.check {
+  justify-content: flex-start;
+}
+.row.check input {
+  accent-color: var(--accent);
+}
+.credits {
+  margin: 12px 0 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.credits a {
+  color: #9cc8ff;
+}
+
+#stats {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--hud-bg);
+  font: 11.5px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+}
+#stats[hidden] {
+  display: none;
+}
+
+.crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+.crosshair[hidden],
+.hint[hidden] {
+  display: none;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  font-size: 13px;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.3s;
+}
+.loading.done {
+  opacity: 0;
+}
+.loading.error {
+  color: #fff;
+  background: rgba(120, 20, 20, 0.6);
+  padding: 20px;
+  text-align: center;
+}
+
+/* ---------- dynamic thumbstick ---------- */
+
+.ts-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ts-start,
+.ts-end,
+.ts-mid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  will-change: transform, opacity;
+}
+.ts-start {
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.34) 0 58%, rgba(0, 0, 0, 0.5) 60% 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.ts-end {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+.ts-mid {
+  background: #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  transition: none;
+}
+.ts-layer.ts-first .ts-start,
+.ts-layer.ts-active .ts-start {
+  opacity: 1;
+}
+.ts-layer.ts-first .ts-end,
+.ts-layer.ts-active .ts-end {
+  opacity: 0.8;
+}
+.ts-layer.ts-active .ts-mid.on {
+  opacity: var(--o);
+}
+.ts-bg {
+  position: absolute;
+  background: radial-gradient(ellipse 85% 85% at 0% 100%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+.ts-layer.ts-active .ts-bg {
+  opacity: 1;
+  transition-duration: 0.15s;
+}
+
+/* ---------- jump button ---------- */
+
+.jump-btn {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55);
+  display: grid;
+  place-items: center;
+}
+.jump-btn svg {
+  width: 62%;
+  height: 62%;
+  fill: rgba(255, 255, 255, 0.9);
+}
+.jump-btn.pressed {
+  background: rgba(255, 255, 255, 0.4);
+}
+.jump-btn.pressed svg {
+  fill: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-start,
+  .ts-end,
+  .ts-bg,
+  .loading {
+    transition: none;
+  }
+}
