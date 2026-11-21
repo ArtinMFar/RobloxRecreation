@@ -111,7 +111,7 @@ export function createUI({ onChange }) {
       const next = mode === 'touch' ? 'keyboard' : 'touch';
       modeBtn.innerHTML = `${ICONS[next]}<span>${next === 'keyboard' ? 'Keyboard' : 'Touch'}</span>`;
       modeBtn.setAttribute('aria-label', `Switch to ${next} controls`);
-      for (const dl of helpPanel.querySelectorAll('[data-for]')) dl.hidden = dl.dataset.for !== mode;
+      for (const node of helpPanel.querySelectorAll('[data-for]')) node.hidden = node.dataset.for !== mode;
     },
     placeModeButton(ts) {
       const inset = parseFloat(getComputedStyle($('safe-area-probe')).paddingLeft) || 0;

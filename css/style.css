@@ -81,6 +81,13 @@ body {
   backdrop-filter: blur(6px);
   cursor: pointer;
 }
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn[hidden] {
+  display: none;
+}
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -161,8 +168,14 @@ body {
   gap: 4px 12px;
   margin: 0;
 }
-.keys[hidden] {
+.keys[hidden],
+.note[hidden] {
   display: none;
+}
+.note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
 }
 .keys dt {
   font-weight: 600;

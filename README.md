@@ -13,6 +13,13 @@ Deploy from a branch*, pick the branch that holds these files and the `/ (root)`
 folder. The site is served from `https://<user>.github.io/<repo>/`. All paths
 are relative and three.js is vendored in `vendor/`, so nothing else is needed.
 
+**Full screen on phones:** Roblox runs edge to edge, and the browser's address
+bar would otherwise eat about a fifth of the height. With a fixed vertical field
+of view, everything would then look that much smaller. The page goes full
+screen (landscape) on the first tap in touch mode, and the top-right button
+toggles it. iPhone Safari has no page full screen; use *Share → Add to Home
+Screen* instead, which launches it full screen through the web app manifest.
+
 **Locally:** browsers block ES modules on `file://`, so serve the folder:
 
 ```sh
@@ -83,6 +90,16 @@ estimate below.
 | Classic mode (PC default) | the camera only turns when you turn it |
 | Follow mode (mobile default) | the camera swings toward the direction from its last position to the character, so strafing drags it around behind you. It has a 0.4 rad/s dead zone and pauses for 2 s after you pan manually |
 
+### Look and scale (`src/world.js`, `src/avatar.js`)
+
+These were matched against untouched Roblox phone screenshots at the same
+resolution:
+
+- **Framing:** at the default camera the avatar is 270 px tall in Roblox and 275 px here.
+- **Floor:** one tile per stud, with a darker purple-grey colour. Lit floor renders at about RGB 107/103/106 here against about 105/99/103 in Roblox.
+- **Shadows:** darker shadows from a strong sun over low ambient light. Shadowed floor is about 0.45× the lit floor here, against about 0.4–0.45× in Roblox.
+- **Avatar shape:** the avatar is fitted to R6 proportions. The torso is 2 studs wide, and the 1-stud arms hang straight and flush against it, 4 studs across in total. The camera focus sits 1.5 studs above the torso centre (4.5 studs up).
+
 ### Mobile controls (`src/touchcontrols.js`)
 
 The DynamicThumbstick layout is reproduced:
@@ -130,8 +147,11 @@ src/input.js          keyboard / mouse / touch → move vector, rotation, zoom
 src/touchcontrols.js  dynamic thumbstick + jump button
 src/avatar.js         avatar rig + R6-style animator
 src/world.js          sky, lights, platform
+src/fullscreen.js     full screen + landscape lock
+manifest.webmanifest  home-screen install (full screen, landscape)
+icons/                app icons
 assets/bacon-hair.glb converted avatar (see below)
-tools/convert_model.py  how the asset was produced
+tools/convert_model.py  how the asset was produced (needs numpy)
 vendor/three/         three.js r170 (MIT)
 ```
 

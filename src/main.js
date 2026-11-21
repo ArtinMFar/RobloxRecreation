@@ -7,6 +7,7 @@ import { Input } from './input.js';
 import { DynamicThumbstick, JumpButton } from './touchcontrols.js';
 import { loadAvatar } from './avatar.js';
 import { createUI } from './ui.js';
+import { setupFullscreen } from './fullscreen.js';
 
 const canvas = document.getElementById('view');
 const layer = document.getElementById('game');
@@ -47,6 +48,7 @@ function applySettings(s) {
   ui.showMode(mode);
 }
 applySettings(ui.settings);
+setupFullscreen({ button: document.getElementById('fullscreen-btn'), isTouchMode: () => input.mode === 'touch' });
 
 input.onActivity = () => ui.closeHelpOnActivity();
 input.onShiftLock = () => {

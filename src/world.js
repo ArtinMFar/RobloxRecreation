@@ -3,32 +3,54 @@
 import * as THREE from 'three';
 import { WORLD } from './config.js';
 
-function gridTexture(renderer) {
-  const px = 256; // one tile = 4 x 4 studs
+const FLOOR_COLOR = '#6b686e';
+const SKY = { top: '#86b4e2', horizon: '#d3e2ee', bottom: '#b9c6d1' };
+
+// One tile per stud, so the avatar (2 studs wide, 5 tall) reads at the right
+// scale against the floor and 16 studs/s looks as fast as it should.
+function studTexture(renderer) {
+  const studs = 8; // texture covers 8 x 8 studs
+  const cell = 64; // pixels per stud
+  const px = studs * cell;
   const c = document.createElement('canvas');
   c.width = c.height = px;
   const g = c.getContext('2d');
-  g.fillStyle = '#9d9fa3';
+  g.fillStyle = FLOOR_COLOR;
   g.fillRect(0, 0, px, px);
-  // faint speckle so the surface reads as a material at grazing angles
   const img = g.getImageData(0, 0, px, px);
   for (let i = 0; i < img.data.length; i += 4) {
-    const n = (Math.random() - 0.5) * 6;
+    const n = (Math.random() - 0.5) * 5;
     img.data[i] += n;
     img.data[i + 1] += n;
     img.data[i + 2] += n;
   }
   g.putImageData(img, 0, 0);
-  g.strokeStyle = 'rgba(0,0,0,0.10)';
-  g.lineWidth = 4;
-  g.strokeRect(0, 0, px, px);
-  g.strokeStyle = 'rgba(255,255,255,0.07)';
-  g.lineWidth = 2;
-  g.strokeRect(4, 4, px - 8, px - 8);
+  const inset = (x, y, colour, dx, dy) => {
+    const s = cell * 0.5;
+    const o = (cell - s) / 2;
+    g.strokeStyle = colour;
+    g.lineWidth = 3;
+    g.beginPath();
+    if (g.roundRect) g.roundRect(x + o + dx, y + o + dy, s, s, 7);
+    else g.rect(x + o + dx, y + o + dy, s, s);
+    g.stroke();
+  };
+  for (let i = 0; i < studs; i++) {
+    for (let j = 0; j < studs; j++) {
+      const x = i * cell;
+      const y = j * cell;
+      // A small bevelled panel per stud: light edge up-left, dark edge down-right.
+      inset(x, y, 'rgba(255,255,255,0.10)', -1, -1);
+      inset(x, y, 'rgba(0,0,0,0.30)', 1, 1);
+      g.fillStyle = 'rgba(0,0,0,0.07)';
+      g.fillRect(x, y, cell, 1);
+      g.fillRect(x, y, 1, cell);
+    }
+  }
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(WORLD.platform.size / 4, WORLD.platform.size / 4);
+  tex.repeat.set(WORLD.platform.size / studs, WORLD.platform.size / studs);
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return tex;
 }
@@ -40,9 +62,9 @@ function sky() {
     depthWrite: false,
     fog: false,
     uniforms: {
-      top: { value: new THREE.Color('#3f86d8') },
-      horizon: { value: new THREE.Color('#bcd9f2') },
-      bottom: { value: new THREE.Color('#9fb6c9') },
+      top: { value: new THREE.Color(SKY.top) },
+      horizon: { value: new THREE.Color(SKY.horizon) },
+      bottom: { value: new THREE.Color(SKY.bottom) },
     },
     vertexShader: /* glsl */ `
       varying vec3 vDir;
@@ -72,11 +94,12 @@ export function createWorld(renderer) {
   const scene = new THREE.Scene();
   const skyMesh = sky();
   scene.add(skyMesh);
-  scene.fog = new THREE.Fog('#bcd9f2', 500, 2600);
+  scene.fog = new THREE.Fog(SKY.horizon, 600, 3000);
 
-  scene.add(new THREE.HemisphereLight('#dfeeff', '#7c7a74', 1.35));
+  // Low ambient against a strong sun gives the darker, higher-contrast shadows.
+  scene.add(new THREE.HemisphereLight('#e4eefa', '#5d5b60', 0.75));
 
-  const sun = new THREE.DirectionalLight('#fff6e8', 2.6);
+  const sun = new THREE.DirectionalLight('#fff8ee', 2.7);
   const sunDir = new THREE.Vector3(0.45, 1, 0.3).normalize();
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -90,8 +113,8 @@ export function createWorld(renderer) {
   scene.add(sun, sun.target);
 
   const { size, thickness, top } = WORLD.platform;
-  const topMat = new THREE.MeshStandardMaterial({ map: gridTexture(renderer), roughness: 0.95, metalness: 0 });
-  const sideMat = new THREE.MeshStandardMaterial({ color: '#6f7175', roughness: 0.95, metalness: 0 });
+  const topMat = new THREE.MeshStandardMaterial({ map: studTexture(renderer), roughness: 0.95, metalness: 0 });
+  const sideMat = new THREE.MeshStandardMaterial({ color: '#5f5d63', roughness: 0.95, metalness: 0 });
   const platform = new THREE.Mesh(new THREE.BoxGeometry(size, thickness, size), [
     sideMat, sideMat, topMat, sideMat, sideMat, sideMat,
   ]);

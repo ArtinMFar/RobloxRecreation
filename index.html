@@ -9,6 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Movement Sandbox</title>
   <meta name="description" content="Third-person character movement and camera sandbox with keyboard, mouse and touch controls.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./css/style.css">
   <script type="importmap">
     { "imports": { "three": "./vendor/three/three.module.min.js" } }
@@ -39,14 +42,19 @@
           <dt>Two fingers</dt><dd>Pinch to zoom</dd>
           <dt>Arrow button</dt><dd>Jump (hold to keep jumping)</dd>
         </dl>
+        <p class="note" data-for="touch">Full screen starts on your first tap (button at the top right).
+          On iPhone, use Share → Add to Home Screen to play full screen.</p>
       </div>
       <pre id="stats" hidden></pre>
     </div>
 
     <div class="top-right">
-      <button class="icon-btn" id="settings-btn" type="button" aria-label="Settings" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4L10.6 6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5A3.5 3.5 0 1 1 13 8.5a3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
-      </button>
+      <div class="btn-row">
+        <button class="icon-btn" id="fullscreen-btn" type="button" aria-label="Full screen" hidden></button>
+        <button class="icon-btn" id="settings-btn" type="button" aria-label="Settings" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4L10.6 6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5A3.5 3.5 0 1 1 13 8.5a3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+        </button>
+      </div>
       <div class="panel" id="settings-panel" hidden>
         <div class="panel-title">Settings</div>
         <label class="row">Camera mode

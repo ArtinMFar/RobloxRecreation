@@ -37,14 +37,37 @@ export async function loadAvatar(url) {
     all.min.y,
     (torsoBox.min.z + torsoBox.max.z) / 2,
   );
-  const boxes = {};
   for (const name of PART_NAMES) {
     geoms[name].translate(-origin.x, -origin.y, -origin.z);
+    geoms[name].computeBoundingBox();
+  }
+  toR6Proportions(geoms);
+  const boxes = {};
+  for (const name of PART_NAMES) {
     geoms[name].computeBoundingBox();
     geoms[name].computeBoundingSphere();
     boxes[name] = geoms[name].boundingBox;
   }
   return new Avatar(geoms, boxes, material);
+}
+
+// R6 builds are a 2-stud-wide torso with 1-stud arms hanging flush against its
+// sides (4 studs across). This model's torso is ~1.84 wide and its shoulders
+// sink into it, which reads noticeably slimmer and smaller on screen.
+const R6_TORSO_WIDTH = 2;
+const R6_ARM_WIDTH = 1;
+
+function toR6Proportions(geoms) {
+  const torso = geoms.Torso.boundingBox;
+  geoms.Torso.scale(R6_TORSO_WIDTH / (torso.max.x - torso.min.x), 1, 1);
+  for (const [name, side] of [['LeftArm', 1], ['RightArm', -1]]) {
+    const g = geoms[name];
+    const b = g.boundingBox;
+    const cx = (b.min.x + b.max.x) / 2;
+    g.translate(-cx, 0, 0);
+    g.scale(R6_ARM_WIDTH / (b.max.x - b.min.x), 1, 1);
+    g.translate(side * (R6_TORSO_WIDTH + R6_ARM_WIDTH) / 2, 0, 0);
+  }
 }
 
 class Avatar {
@@ -55,7 +78,9 @@ class Avatar {
     this.meshes = [];
 
     const torso = boxes.Torso;
-    this.rootHeight = (torso.min.y + torso.max.y) / 2; // HumanoidRootPart centre
+    // HumanoidRootPart centre = middle of the torso body (its box also includes
+    // the collar that tucks under the head).
+    this.rootHeight = (torso.min.y + Math.min(torso.max.y, boxes.Head.min.y)) / 2;
     this.height = boxes.Hair.max.y;
 
     const addPart = (parent, name, pivot) => {
